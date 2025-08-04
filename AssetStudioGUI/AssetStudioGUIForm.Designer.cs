@@ -76,6 +76,9 @@
             this.debugMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem15 = new System.Windows.Forms.ToolStripMenuItem();
             this.exportClassStructuresMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scriptsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.builtInScriptsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openScriptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -155,7 +158,8 @@
             this.modelToolStripMenuItem,
             this.exportToolStripMenuItem,
             this.filterTypeToolStripMenuItem,
-            this.debugMenuItem});
+            this.debugMenuItem,
+            this.scriptsMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1264, 25);
@@ -523,6 +527,29 @@
             this.exportClassStructuresMenuItem.Size = new System.Drawing.Size(207, 22);
             this.exportClassStructuresMenuItem.Text = "Export class structures";
             this.exportClassStructuresMenuItem.Click += new System.EventHandler(this.exportClassStructuresMenuItem_Click);
+            // 
+            // scriptsMenuItem
+            // 
+            this.scriptsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.builtInScriptsMenuItem,
+            this.openScriptMenuItem});
+            this.scriptsMenuItem.Name = "scriptsMenuItem";
+            this.scriptsMenuItem.Size = new System.Drawing.Size(58, 21);
+            this.scriptsMenuItem.Text = "Scripts";
+            // 
+            // builtInScriptsMenuItem
+            // 
+            this.builtInScriptsMenuItem.Name = "builtInScriptsMenuItem";
+            this.builtInScriptsMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.builtInScriptsMenuItem.Text = "Built-In";
+            this.builtInScriptsMenuItem.Click += new System.EventHandler(this.builtInScriptsMenuItem_Click);
+            // 
+            // openScriptMenuItem
+            // 
+            this.openScriptMenuItem.Name = "openScriptMenuItem";
+            this.openScriptMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openScriptMenuItem.Text = "Open Script";
+            this.openScriptMenuItem.Click += new System.EventHandler(this.openScriptMenuItem_Click);
             // 
             // splitContainer1
             // 
@@ -1162,6 +1189,9 @@
         private System.Windows.Forms.ToolStripMenuItem showExpOpt;
         private GOHierarchy sceneTreeView;
         private System.Windows.Forms.ToolStripMenuItem debugMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem scriptsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem builtInScriptsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openScriptMenuItem;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.ListView classesListView;
         private System.Windows.Forms.ColumnHeader columnHeader2;

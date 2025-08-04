@@ -2108,6 +2108,38 @@ namespace AssetStudioGUI
                 rmdown = false;
             }
         }
+
+        private void builtInScriptsMenuItem_Click(object sender, EventArgs e)
+        {
+            // TODO: ADD BUILT IN SCRIPTS LOL
+        }
+
+        private void openScriptMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "C# Files (*.cs)|*.cs";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.Title = "Open C# Script";
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string filePath = openFileDialog.FileName;
+                        string fileName = Path.GetFileName(filePath);                        
+                        string fileContent = File.ReadAllText(filePath);
+                        // TODO: MAKE IT ACTUALLY DO SHIT LOLL
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error opening file: {ex.Message}", 
+                            "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
         #endregion
     }
 }
