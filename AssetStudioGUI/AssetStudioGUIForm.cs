@@ -89,6 +89,7 @@ namespace AssetStudioGUI
         private string saveDirectoryBackup = string.Empty;
 
         private GUILogger logger;
+        private ScriptExecutor scriptExecutor;
 
         [DllImport("gdi32.dll")]
         private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [In] ref uint pcFonts);
@@ -2109,12 +2110,99 @@ namespace AssetStudioGUI
             }
         }
 
-        private void builtInScriptsMenuItem_Click(object sender, EventArgs e)
+        private void builtInScriptsMenuItem_Click(object sender, EventArgs e)   {}
+
+        private void builtInScriptsMenuItem_DropDownOpening(object sender, EventArgs e)
         {
-            // TODO: ADD BUILT IN SCRIPTS LOL
+            builtInScriptsMenuItem.DropDownItems.Clear();
+            string scriptsFolder = Path.Combine(Application.StartupPath, "Scripts");
+            
+            if (!Directory.Exists(scriptsFolder))
+            {
+                Directory.CreateDirectory(scriptsFolder);                
+                var placeholderItem = new ToolStripMenuItem("No scripts found. Add .cs files to the Scripts folder.");
+                placeholderItem.Enabled = false;
+                builtInScriptsMenuItem.DropDownItems.Add(placeholderItem);
+                return;
+            }
+            PopulateScriptsMenu(builtInScriptsMenuItem, scriptsFolder);
         }
 
-        private void openScriptMenuItem_Click(object sender, EventArgs e)
+        private void PopulateScriptsMenu(ToolStripMenuItem parentMenuItem, string folderPath)
+        {
+            try
+            {
+                string[] directories = Directory.GetDirectories(folderPath);
+                foreach (string dir in directories)
+                {
+                    string folderName = Path.GetFileName(dir);
+                    var folderMenuItem = new ToolStripMenuItem(folderName);
+                    PopulateScriptsMenu(folderMenuItem, dir);
+                    parentMenuItem.DropDownItems.Add(folderMenuItem);
+                }
+                string[] csFiles = Directory.GetFiles(folderPath, "*.cs");
+                foreach (string file in csFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    var fileMenuItem = new ToolStripMenuItem(fileName);
+                    fileMenuItem.Tag = file;
+                    fileMenuItem.Click += ScriptMenuItem_Click;
+                    parentMenuItem.DropDownItems.Add(fileMenuItem);
+                }
+                if (parentMenuItem.DropDownItems.Count == 0)
+                {
+                    var placeholderItem = new ToolStripMenuItem("No scripts in this folder");
+                    placeholderItem.Enabled = false;
+                    parentMenuItem.DropDownItems.Add(placeholderItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                var errorItem = new ToolStripMenuItem($"Error: {ex.Message}");
+                errorItem.Enabled = false;
+                parentMenuItem.DropDownItems.Add(errorItem);
+            }
+        }
+
+        private async void ScriptMenuItem_Click(object sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem menuItem && menuItem.Tag is string filePath)
+            {
+                try
+                {
+                    string fileName = Path.GetFileName(filePath);
+                    
+                    if (scriptExecutor == null)
+                    {
+                        scriptExecutor = new ScriptExecutor(Studio.assetsManager, logger);
+                    }
+
+                    var result = await scriptExecutor.ExecuteScriptAsync(filePath);
+                    
+                    if (result.Success)
+                    {
+                        string message = $"Script '{fileName}' executed successfully!";
+                        if (result.ReturnValue != null)
+                        {
+                            message += $"\n\nReturn value: {result.ReturnValue}";
+                        }
+                        MessageBox.Show(message, "Script Execution", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Script execution failed:\n{result.ErrorMessage}", 
+                            "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error executing script: {ex.Message}", 
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private async void openScriptMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -2128,13 +2216,33 @@ namespace AssetStudioGUI
                     try
                     {
                         string filePath = openFileDialog.FileName;
-                        string fileName = Path.GetFileName(filePath);                        
-                        string fileContent = File.ReadAllText(filePath);
-                        // TODO: MAKE IT ACTUALLY DO SHIT LOLL
+                        string fileName = Path.GetFileName(filePath);
+                        
+                        if (scriptExecutor == null)
+                        {
+                            scriptExecutor = new ScriptExecutor(Studio.assetsManager, logger);
+                        }
+
+                        var result = await scriptExecutor.ExecuteScriptAsync(filePath);
+                        
+                        if (result.Success)
+                        {
+                            string message = $"Script '{fileName}' executed successfully!";
+                            if (result.ReturnValue != null)
+                            {
+                                message += $"\n\nReturn value: {result.ReturnValue}";
+                            }
+                            MessageBox.Show(message, "Script Execution", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Script execution failed:\n{result.ErrorMessage}", 
+                                "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error opening file: {ex.Message}", 
+                        MessageBox.Show($"Error executing script: {ex.Message}", 
                             "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }

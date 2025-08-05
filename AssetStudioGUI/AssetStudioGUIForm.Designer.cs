@@ -543,6 +543,7 @@
             this.builtInScriptsMenuItem.Size = new System.Drawing.Size(152, 22);
             this.builtInScriptsMenuItem.Text = "Built-In";
             this.builtInScriptsMenuItem.Click += new System.EventHandler(this.builtInScriptsMenuItem_Click);
+            this.builtInScriptsMenuItem.DropDownOpening += new System.EventHandler(this.builtInScriptsMenuItem_DropDownOpening);
             // 
             // openScriptMenuItem
             // 
