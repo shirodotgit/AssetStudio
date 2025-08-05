@@ -89,6 +89,7 @@ namespace AssetStudioGUI
         private string saveDirectoryBackup = string.Empty;
 
         private GUILogger logger;
+        private ScriptExecutor scriptExecutor;
 
         [DllImport("gdi32.dll")]
         private static extern IntPtr AddFontMemResourceEx(IntPtr pbFont, uint cbFont, IntPtr pdv, [In] ref uint pcFonts);
@@ -2163,25 +2164,45 @@ namespace AssetStudioGUI
             }
         }
 
-        private void ScriptMenuItem_Click(object sender, EventArgs e)
+        private async void ScriptMenuItem_Click(object sender, EventArgs e)
         {
             if (sender is ToolStripMenuItem menuItem && menuItem.Tag is string filePath)
             {
                 try
                 {
-                    string fileContent = File.ReadAllText(filePath);
-                    string fileName = Path.GetFileName(filePath);            
-                    // TODO: script parser/execution shit
+                    string fileName = Path.GetFileName(filePath);
+                    
+                    if (scriptExecutor == null)
+                    {
+                        scriptExecutor = new ScriptExecutor(Studio.assetsManager, logger);
+                    }
+
+                    var result = await scriptExecutor.ExecuteScriptAsync(filePath);
+                    
+                    if (result.Success)
+                    {
+                        string message = $"Script '{fileName}' executed successfully!";
+                        if (result.ReturnValue != null)
+                        {
+                            message += $"\n\nReturn value: {result.ReturnValue}";
+                        }
+                        MessageBox.Show(message, "Script Execution", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Script execution failed:\n{result.ErrorMessage}", 
+                            "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error reading script: {ex.Message}", 
+                    MessageBox.Show($"Error executing script: {ex.Message}", 
                         "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
-        private void openScriptMenuItem_Click(object sender, EventArgs e)
+        private async void openScriptMenuItem_Click(object sender, EventArgs e)
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
@@ -2195,13 +2216,33 @@ namespace AssetStudioGUI
                     try
                     {
                         string filePath = openFileDialog.FileName;
-                        string fileName = Path.GetFileName(filePath);                        
-                        string fileContent = File.ReadAllText(filePath);
-                        // TODO: MAKE IT ACTUALLY DO SHIT LOLL
+                        string fileName = Path.GetFileName(filePath);
+                        
+                        if (scriptExecutor == null)
+                        {
+                            scriptExecutor = new ScriptExecutor(Studio.assetsManager, logger);
+                        }
+
+                        var result = await scriptExecutor.ExecuteScriptAsync(filePath);
+                        
+                        if (result.Success)
+                        {
+                            string message = $"Script '{fileName}' executed successfully!";
+                            if (result.ReturnValue != null)
+                            {
+                                message += $"\n\nReturn value: {result.ReturnValue}";
+                            }
+                            MessageBox.Show(message, "Script Execution", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Script execution failed:\n{result.ErrorMessage}", 
+                                "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error opening file: {ex.Message}", 
+                        MessageBox.Show($"Error executing script: {ex.Message}", 
                             "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
