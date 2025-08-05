@@ -2109,9 +2109,76 @@ namespace AssetStudioGUI
             }
         }
 
-        private void builtInScriptsMenuItem_Click(object sender, EventArgs e)
+        private void builtInScriptsMenuItem_Click(object sender, EventArgs e)   {}
+
+        private void builtInScriptsMenuItem_DropDownOpening(object sender, EventArgs e)
         {
-            // TODO: ADD BUILT IN SCRIPTS LOL
+            builtInScriptsMenuItem.DropDownItems.Clear();
+            string scriptsFolder = Path.Combine(Application.StartupPath, "Scripts");
+            
+            if (!Directory.Exists(scriptsFolder))
+            {
+                Directory.CreateDirectory(scriptsFolder);                
+                var placeholderItem = new ToolStripMenuItem("No scripts found. Add .cs files to the Scripts folder.");
+                placeholderItem.Enabled = false;
+                builtInScriptsMenuItem.DropDownItems.Add(placeholderItem);
+                return;
+            }
+            PopulateScriptsMenu(builtInScriptsMenuItem, scriptsFolder);
+        }
+
+        private void PopulateScriptsMenu(ToolStripMenuItem parentMenuItem, string folderPath)
+        {
+            try
+            {
+                string[] directories = Directory.GetDirectories(folderPath);
+                foreach (string dir in directories)
+                {
+                    string folderName = Path.GetFileName(dir);
+                    var folderMenuItem = new ToolStripMenuItem(folderName);
+                    PopulateScriptsMenu(folderMenuItem, dir);
+                    parentMenuItem.DropDownItems.Add(folderMenuItem);
+                }
+                string[] csFiles = Directory.GetFiles(folderPath, "*.cs");
+                foreach (string file in csFiles)
+                {
+                    string fileName = Path.GetFileName(file);
+                    var fileMenuItem = new ToolStripMenuItem(fileName);
+                    fileMenuItem.Tag = file;
+                    fileMenuItem.Click += ScriptMenuItem_Click;
+                    parentMenuItem.DropDownItems.Add(fileMenuItem);
+                }
+                if (parentMenuItem.DropDownItems.Count == 0)
+                {
+                    var placeholderItem = new ToolStripMenuItem("No scripts in this folder");
+                    placeholderItem.Enabled = false;
+                    parentMenuItem.DropDownItems.Add(placeholderItem);
+                }
+            }
+            catch (Exception ex)
+            {
+                var errorItem = new ToolStripMenuItem($"Error: {ex.Message}");
+                errorItem.Enabled = false;
+                parentMenuItem.DropDownItems.Add(errorItem);
+            }
+        }
+
+        private void ScriptMenuItem_Click(object sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem menuItem && menuItem.Tag is string filePath)
+            {
+                try
+                {
+                    string fileContent = File.ReadAllText(filePath);
+                    string fileName = Path.GetFileName(filePath);            
+                    // TODO: script parser/execution shit
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error reading script: {ex.Message}", 
+                        "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void openScriptMenuItem_Click(object sender, EventArgs e)
